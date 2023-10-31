@@ -1,15 +1,17 @@
-FROM golang:1.18.1 AS stage1
+FROM golang:1.19.1 AS build
 
 WORKDIR /app
+
 COPY go.mod ./
+
 COPY main.go ./
 
-RUN go build -o /full-go
+RUN CGO_ENABLED=0 go build -o /full-go
 
-FROM gcr.io/distroless/base-debian10
+FROM alpine:latest
 
 WORKDIR /
 
-COPY --from=stage1 /full-go /full-go
+COPY --from=build /full-go /full-go
 
 CMD ["/full-go"]

@@ -1,4 +1,4 @@
-FROM golang:1.19.1 AS build
+FROM golang:alpine AS builder
 
 WORKDIR /app
 
@@ -6,12 +6,12 @@ COPY go.mod ./
 
 COPY main.go ./
 
-RUN CGO_ENABLED=0 go build -o /full-go
+RUN CGO_ENABLED=0 go build -ldflags '-s -w' main.go
 
-FROM alpine:latest
+FROM scratch
 
 WORKDIR /
 
-COPY --from=build /full-go /full-go
+COPY --from=builder /app /
 
-CMD ["/full-go"]
+CMD ["./main"]
